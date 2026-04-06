@@ -4,6 +4,22 @@ import fear_greed as fg
 from datetime import datetime
 import yfinance as yf
 import time
+import logging
+import traceback
+import os
+
+log_dir = os.path.dirname(os.path.abspath(__file__))
+log_file = os.path.join(log_dir, 'app.log')
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_file),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 query_params = st.query_params
 page = query_params.get('page', 'home') if query_params else 'home'
@@ -858,11 +874,19 @@ def render_detail_page(symbol):
 
 
 def main():
-    if page == 'detail':
-        symbol = query_params.get('symbol', 'MSFT') if query_params else 'MSFT'
-        render_detail_page(symbol)
-    else:
-        render_home_page()
+    try:
+        logger.info(f"Starting app - page: {page}")
+        if page == 'detail':
+            symbol = query_params.get('symbol', 'MSFT') if query_params else 'MSFT'
+            logger.info(f"Rendering detail page for symbol: {symbol}")
+            render_detail_page(symbol)
+        else:
+            logger.info("Rendering home page")
+            render_home_page()
+    except Exception as e:
+        logger.error(f"App error: {str(e)}")
+        logger.error(traceback.format_exc())
+        st.error(f"发生错误: {str(e)}")
 
 
 if __name__ == "__main__":
