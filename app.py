@@ -66,16 +66,25 @@ def get_ticker_pe(ticker, max_retries=3):
 
 @st.cache_data(ttl=3600)
 def get_sp500_pe():
+    MOCK_MODE = True
+    if MOCK_MODE:
+        return 24.5
     return get_ticker_pe("SPY")
 
 
 @st.cache_data(ttl=3600)
 def get_ndx_valuation():
+    MOCK_MODE = True
+    if MOCK_MODE:
+        return 32.8
     return get_ticker_pe("QQQ")
 
 
 @st.cache_data(ttl=3600)
 def get_fear_greed():
+    MOCK_MODE = True
+    if MOCK_MODE:
+        return 45.0
     try:
         score = fg.get_score()
         return score
@@ -98,8 +107,42 @@ def get_valuation_status(pe, pe_historical):
         return "极高", "red"
 
 
+def get_index_color(pe, pe_historical):
+    if pe is None:
+        return "#888888"
+    if pe < pe_historical[0]:
+        return "#00c864"
+    elif pe < pe_historical[1]:
+        return "#78c864"
+    elif pe < pe_historical[2]:
+        return "#ffc800"
+    elif pe < pe_historical[3]:
+        return "#ff8c00"
+    else:
+        return "#ff3232"
+
+
 @st.cache_data(ttl=300)
 def get_stock_info(ticker_symbol):
+    MOCK_MODE = True
+    
+    if MOCK_MODE:
+        mock_data = {
+            'MSFT': {'shortName': 'Microsoft Corporation', 'currentPrice': 425.50, 'trailingPE': 35.2, 'priceToBook': 12.5, 'forwardPE': 28.1, 'pegRatio': 2.1, 'marketCap': 3160000000000, 'sector': 'Technology', 'industry': 'Software', 'beta': 0.91, 'fiftyTwoWeekHigh': 468.35, 'fiftyTwoWeekLow': 309.45, 'fiftyDayAverage': 418.20, 'twoHundredDayAverage': 398.50, 'dividendYield': 0.0072, 'dividendRate': 3.00, 'volume': 24500000, 'averageVolume': 22300000, 'recommendKey': 'Buy', 'targetMeanPrice': 480.00, 'priceToSalesForward': 12.3, 'totalRevenue': 211000000000, 'grossProfit': 135000000000, 'operatingIncome': 89000000000, 'ebitda': 105000000000, 'profitMargins': 0.36, 'operatingMargins': 0.42, 'returnOnEquity': 0.38, 'returnOnAssets': 0.15, 'totalDebt': 42000000000, 'totalCash': 81000000000},
+            'GOOGL': {'shortName': 'Alphabet Inc.', 'currentPrice': 175.80, 'trailingPE': 25.8, 'priceToBook': 6.8, 'forwardPE': 20.5, 'pegRatio': 1.4, 'marketCap': 2180000000000, 'sector': 'Technology', 'industry': 'Internet', 'beta': 1.05, 'fiftyTwoWeekHigh': 191.75, 'fiftyTwoWeekLow': 120.21, 'fiftyDayAverage': 168.50, 'twoHundredDayAverage': 155.30, 'dividendYield': 0, 'dividendRate': 0, 'volume': 18900000, 'averageVolume': 21500000, 'recommendKey': 'Buy', 'targetMeanPrice': 190.00, 'priceToSalesForward': 5.8, 'totalRevenue': 305000000000, 'grossProfit': 177000000000, 'operatingIncome': 84000000000, 'ebitda': 99000000000, 'profitMargins': 0.24, 'operatingMargins': 0.28, 'returnOnEquity': 0.25, 'returnOnAssets': 0.14, 'totalDebt': 15000000000, 'totalCash': 113000000000},
+            'AAPL': {'shortName': 'Apple Inc.', 'currentPrice': 192.50, 'trailingPE': 31.2, 'priceToBook': 45.2, 'forwardPE': 26.8, 'pegRatio': 2.3, 'marketCap': 2980000000000, 'sector': 'Technology', 'industry': 'Consumer Electronics', 'beta': 1.28, 'fiftyTwoWeekHigh': 199.62, 'fiftyTwoWeekLow': 124.17, 'fiftyDayAverage': 185.40, 'twoHundredDayAverage': 172.80, 'dividendYield': 0.0051, 'dividendRate': 0.96, 'volume': 51200000, 'averageVolume': 48500000, 'recommendKey': 'Buy', 'targetMeanPrice': 210.00, 'priceToSalesForward': 8.5, 'totalRevenue': 385000000000, 'grossProfit': 203000000000, 'operatingIncome': 114000000000, 'ebitda': 128000000000, 'profitMargins': 0.26, 'operatingMargins': 0.30, 'returnOnEquity': 1.52, 'returnOnAssets': 0.28, 'totalDebt': 110000000000, 'totalCash': 67000000000},
+            'NVDA': {'shortName': 'NVIDIA Corporation', 'currentPrice': 875.30, 'trailingPE': 65.8, 'priceToBook': 48.5, 'forwardPE': 42.3, 'pegRatio': 1.8, 'marketCap': 2160000000000, 'sector': 'Technology', 'industry': 'Semiconductors', 'beta': 1.65, 'fiftyTwoWeekHigh': 974.00, 'fiftyTwoWeekLow': 222.97, 'fiftyDayAverage': 820.50, 'twoHundredDayAverage': 650.20, 'dividendYield': 0.0003, 'dividendRate': 0.16, 'volume': 38500000, 'averageVolume': 41200000, 'recommendKey': 'Buy', 'targetMeanPrice': 950.00, 'priceToSalesForward': 25.2, 'totalRevenue': 61000000000, 'grossProfit': 33000000000, 'operatingIncome': 28000000000, 'ebitda': 30000000000, 'profitMargins': 0.45, 'operatingMargins': 0.46, 'returnOnEquity': 0.72, 'returnOnAssets': 0.35, 'totalDebt': 8000000000, 'totalCash': 16000000000},
+            'META': {'shortName': 'Meta Platforms Inc.', 'currentPrice': 505.20, 'trailingPE': 28.5, 'priceToBook': 6.2, 'forwardPE': 18.2, 'pegRatio': 1.2, 'marketCap': 1290000000000, 'sector': 'Technology', 'industry': 'Internet', 'beta': 1.22, 'fiftyTwoWeekHigh': 531.49, 'fiftyTwoWeekLow': 274.38, 'fiftyDayAverage': 485.60, 'twoHundredDayAverage': 420.30, 'dividendYield': 0, 'dividendRate': 0, 'volume': 15200000, 'averageVolume': 14500000, 'recommendKey': 'Buy', 'targetMeanPrice': 550.00, 'priceToSalesForward': 6.8, 'totalRevenue': 134000000000, 'grossProfit': 75000000000, 'operatingIncome': 47000000000, 'ebitda': 55000000000, 'profitMargins': 0.35, 'operatingMargins': 0.35, 'returnOnEquity': 0.32, 'returnOnAssets': 0.18, 'totalDebt': 18000000000, 'totalCash': 41000000000},
+            'TSLA': {'shortName': 'Tesla Inc.', 'currentPrice': 178.50, 'trailingPE': 52.3, 'priceToBook': 9.8, 'forwardPE': 38.5, 'pegRatio': 1.5, 'marketCap': 567000000000, 'sector': 'Consumer Cyclical', 'industry': 'Auto Manufacturers', 'beta': 2.05, 'fiftyTwoWeekHigh': 299.29, 'fiftyTwoWeekLow': 152.89, 'fiftyDayAverage': 195.80, 'twoHundredDayAverage': 225.40, 'dividendYield': 0, 'dividendRate': 0, 'volume': 98000000, 'averageVolume': 105000000, 'recommendKey': 'Hold', 'targetMeanPrice': 200.00, 'priceToSalesForward': 6.2, 'totalRevenue': 96000000000, 'grossProfit': 17000000000, 'operatingIncome': 4000000000, 'ebitda': 11000000000, 'profitMargins': 0.15, 'operatingMargins': 0.04, 'returnOnEquity': 0.25, 'returnOnAssets': 0.10, 'totalDebt': 43000000000, 'totalCash': 29000000000},
+            'AMZN': {'shortName': 'Amazon.com Inc.', 'currentPrice': 185.20, 'trailingPE': 42.5, 'priceToBook': 8.2, 'forwardPE': 32.1, 'pegRatio': 1.6, 'marketCap': 1920000000000, 'sector': 'Consumer Cyclical', 'industry': 'Internet', 'beta': 1.15, 'fiftyTwoWeekHigh': 201.20, 'fiftyTwoWeekLow': 118.35, 'fiftyDayAverage': 175.80, 'twoHundredDayAverage': 162.50, 'dividendYield': 0, 'dividendRate': 0, 'volume': 42500000, 'averageVolume': 38500000, 'recommendKey': 'Buy', 'targetMeanPrice': 210.00, 'priceToSalesForward': 2.5, 'totalRevenue': 575000000000, 'grossProfit': 201000000000, 'operatingIncome': 61000000000, 'ebitda': 76000000000, 'profitMargins': 0.06, 'operatingMargins': 0.11, 'returnOnEquity': 0.25, 'returnOnAssets': 0.08, 'totalDebt': 73000000000, 'totalCash': 73000000000},
+            'AVGO': {'shortName': 'Broadcom Inc.', 'currentPrice': 1285.40, 'trailingPE': 58.2, 'priceToBook': 15.8, 'forwardPE': 25.5, 'pegRatio': 1.9, 'marketCap': 598000000000, 'sector': 'Technology', 'industry': 'Semiconductors', 'beta': 1.18, 'fiftyTwoWeekHigh': 1438.17, 'fiftyTwoWeekLow': 796.42, 'fiftyDayAverage': 1220.50, 'twoHundredDayAverage': 1050.20, 'dividendYield': 0.0098, 'dividendRate': 21.00, 'volume': 2800000, 'averageVolume': 3200000, 'recommendKey': 'Buy', 'targetMeanPrice': 1400.00, 'priceToSalesForward': 14.5, 'totalRevenue': 52000000000, 'grossProfit': 30000000000, 'operatingIncome': 14000000000, 'ebitda': 17000000000, 'profitMargins': 0.25, 'operatingMargins': 0.27, 'returnOnEquity': 0.55, 'returnOnAssets': 0.22, 'totalDebt': 24000000000, 'totalCash': 12000000000},
+            'TSM': {'shortName': 'Taiwan Semiconductor', 'currentPrice': 142.80, 'trailingPE': 22.5, 'priceToBook': 4.8, 'forwardPE': 18.2, 'pegRatio': 1.1, 'marketCap': 742000000000, 'sector': 'Technology', 'industry': 'Semiconductors', 'beta': 1.08, 'fiftyTwoWeekHigh': 173.56, 'fiftyTwoWeekLow': 93.96, 'fiftyDayAverage': 138.50, 'twoHundredDayAverage': 125.30, 'dividendYield': 0.0158, 'dividendRate': 1.82, 'volume': 8500000, 'averageVolume': 9200000, 'recommendKey': 'Buy', 'targetMeanPrice': 160.00, 'priceToSalesForward': 6.2, 'totalRevenue': 75000000000, 'grossProfit': 38000000000, 'operatingIncome': 29000000000, 'ebitda': 33000000000, 'profitMargins': 0.38, 'operatingMargins': 0.39, 'returnOnEquity': 0.35, 'returnOnAssets': 0.20, 'totalDebt': 18000000000, 'totalCash': 42000000000},
+        }
+        ticker = ticker_symbol.upper()
+        if ticker in mock_data:
+            return mock_data[ticker]
+        return {}
+    
     try:
         tk = yf.Ticker(ticker_symbol)
         info = tk.info or {}
@@ -108,16 +151,35 @@ def get_stock_info(ticker_symbol):
         return {}
 
 
-def get_pe_gauge_html(pe_value, max_pe=60):
+def get_pe_color(pe, max_pe=60):
+    if pe is None:
+        return "#888888"
+    pct = min(pe / max_pe * 100, 100)
+    if pct < 30:
+        return "#00c864"
+    elif pct < 50:
+        return "#78c864"
+    elif pct < 70:
+        return "#ffc800"
+    elif pct < 85:
+        return "#ff8c00"
+    else:
+        return "#ff3232"
+
+
+def get_pe_gauge_html(pe_value, max_pe=60, color=None):
     if pe_value is None:
         percentage = 0
     else:
         percentage = min(pe_value / max_pe * 100, 100)
     
+    if color is None:
+        color = "#78c864"
+    
     svg = f"""
     <svg viewBox="0 0 200 120" style="width: 100%; max-width: 200px;">
         <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="16" stroke-linecap="round"/>
-        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#78c864" stroke-width="16" stroke-linecap="round" stroke-dasharray="{percentage * 2.51} 251"/>
+        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="{color}" stroke-width="16" stroke-linecap="round" stroke-dasharray="{percentage * 2.51} 251"/>
         <text x="100" y="85" text-anchor="middle" fill="white" font-size="24" font-weight="bold">{pe_value if pe_value else "--"}</text>
         <text x="100" y="105" text-anchor="middle" fill="#888" font-size="12">PE</text>
     </svg>
@@ -149,6 +211,7 @@ def render_stock_card(stock, symbol):
     pb = stock.get('pb')
     pe_pct = min((pe / 60 * 100) if pe else 0, 100)
     pb_pct = min((pb / 20 * 100) if pb else 0, 100)
+    pe_color = get_pe_color(pe)
     
     target = stock.get('target')
     upside = 0
@@ -179,7 +242,7 @@ def render_stock_card(stock, symbol):
             <div style="flex:1">
                 <div style="color:#888;font-size:0.7rem;margin-bottom:6px">PE</div>
                 <div style="height:10px;background:rgba(255,255,255,0.1);border-radius:5px;overflow:hidden;">
-                    <div style="width:{pe_pct}%;height:100%;background:linear-gradient(90deg,#00c864,#78c864,#ffc800,#ff8c00,#ff3232);border-radius:5px;"></div>
+                    <div style="width:{pe_pct}%;height:100%;background:{pe_color};border-radius:5px;"></div>
                 </div>
                 <div style="color:white;font-size:0.95rem;font-weight:600;margin-top:4px">{pe_str}</div>
             </div>
@@ -342,6 +405,9 @@ def render_home_page():
         padding-bottom: 8px;
         border-bottom: 2px solid rgba(0,164,255,0.3);
     }
+    #MainMenu {visibility: hidden;}
+    .stDeployButton {display: none;}
+    header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
@@ -352,17 +418,13 @@ def render_home_page():
     </div>
     """, unsafe_allow_html=True)
 
-    col_left, col_center, col_right = st.columns([1, 1, 1])
-    with col_center:
-        if st.button("🔄"):
-            st.rerun()
-
     st.markdown(f'<div class="last-update">最后更新: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</div>', unsafe_allow_html=True)
 
     sp500_pe = get_sp500_pe()
     ndx_pe = get_ndx_valuation()
     fear_greed_value = get_fear_greed()
-
+    meter_position = fear_greed_value if fear_greed_value else 50
+    
     sp500_historical = (15, 18, 22, 28)
     ndx_historical = (20, 25, 35, 45)
 
@@ -372,6 +434,9 @@ def render_home_page():
     sp500_display = f"{sp500_pe:.2f}" if sp500_pe else "—"
     ndx_display = f"{ndx_pe:.2f}" if ndx_pe else "—"
     fg_display = f"{fear_greed_value:.2f}" if fear_greed_value else "—"
+    
+    ndx_color_val = get_index_color(ndx_pe, ndx_historical)
+    sp500_color_val = get_index_color(sp500_pe, sp500_historical)
 
     col1, col2, col3 = st.columns(3)
 
@@ -379,7 +444,7 @@ def render_home_page():
         st.markdown(f"""
         <div class="card">
             <div class="card-title">纳斯达克100 (QQQ ETF) <a href="https://finance.yahoo.com/quote/QQQ" target="_blank">[来源]</a></div>
-            <div class="big-value" style="color: #00a4ff;">{ndx_display}</div>
+            <div class="big-value" style="color: {ndx_color_val};">{ndx_display}</div>
             <div class="status-label status-{ndx_color}">{ndx_status}</div>
             <div style="margin-top: 16px;">
                 <div class="metric-row"><span class="metric-label">当前PE</span><span class="metric-value">{ndx_display}</span></div>
@@ -396,7 +461,7 @@ def render_home_page():
         st.markdown(f"""
         <div class="card">
             <div class="card-title">标普500 (SPY ETF) <a href="https://finance.yahoo.com/quote/SPY" target="_blank">[来源]</a></div>
-            <div class="big-value" style="color: #00c864;">{sp500_display}</div>
+            <div class="big-value" style="color: {sp500_color_val};">{sp500_display}</div>
             <div class="status-label status-{sp500_color}">{sp500_status}</div>
             <div style="margin-top: 16px;">
                 <div class="metric-row"><span class="metric-label">CAPE估值</span><span class="metric-value">{sp500_display}</span></div>
@@ -428,13 +493,21 @@ def render_home_page():
             fg_label = "极度贪婪"
             fg_color_code = "red"
 
-    meter_position = fear_greed_value if fear_greed_value else 50
+    fg_color_map = {
+        'green': '#00c864',
+        'lightgreen': '#78c864',
+        'yellow': '#ffc800',
+        'orange': '#ff8c00',
+        'red': '#ff3232',
+        'gray': '#888888'
+    }
+    fg_value_color = fg_color_map.get(fg_color_code, '#888888')
     
     with col3:
         st.markdown(f"""
         <div class="card">
             <div class="card-title">CNN恐惧贪婪指数 <a href="https://edition.cnn.com/markets/fear-and-greed" target="_blank">[来源]</a></div>
-            <div class="big-value" style="color: #ff6b6b;">{fg_display}</div>
+            <div class="big-value" style="color: {fg_value_color};">{fg_display}</div>
             <div class="status-label status-{fg_color_code}">{fg_label}</div>
             <div class="fg-meter-container">
                 <div class="fg-meter">
@@ -579,13 +652,15 @@ def render_detail_page(symbol):
     if 'search_stock' not in st.session_state:
         st.session_state.search_stock = symbol
     
-    col_search, col_btn = st.columns([4, 1])
-    with col_search:
-        search_ticker = st.text_input("输入股票代码", value=st.session_state.search_stock, key="search_ticker")
-    with col_btn:
-        if st.button("🔍 查询", key="search_btn"):
-            st.session_state.search_stock = search_ticker.upper()
-            st.rerun()
+    with st.form("search_form"):
+        col_search, col_btn = st.columns([5, 1])
+        with col_search:
+            search_ticker = st.text_input("输入股票代码", value=st.session_state.search_stock, key="search_ticker")
+        with col_btn:
+            submitted = st.form_submit_button("🔍 查询")
+            if submitted:
+                st.session_state.search_stock = search_ticker.upper()
+                st.rerun()
     
     if not st.session_state.search_stock:
         st.session_state.search_stock = "MSFT"
@@ -613,10 +688,11 @@ def render_detail_page(symbol):
     pb = info.get('priceToBook')
     forward_pe = info.get('forwardPE')
     peg = info.get('pegRatio')
+    pe_color = get_pe_color(pe)
     
     col_g1, col_g2, col_g3, col_g4 = st.columns(4)
     with col_g1:
-        st.markdown(f'<div class="gauge-wrapper">{get_pe_gauge_html(pe)}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="gauge-wrapper">{get_pe_gauge_html(pe, color=pe_color)}</div>', unsafe_allow_html=True)
     with col_g2:
         st.markdown(f'<div class="gauge-wrapper">{get_pb_gauge_html(pb)}</div>', unsafe_allow_html=True)
     with col_g3:
