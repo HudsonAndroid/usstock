@@ -1,3 +1,4 @@
 streamlit
 requests
 fear-greed
+yfinance

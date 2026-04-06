@@ -1,0 +1,50 @@
+# 在本地仓库初始化 git（如果没有）
+cd C:\Users\ASUS\Desktop\usstock
+git init
+git add .
+git commit -m "init"
+# 在 VM 上安装 git，clone 仓库
+2. 在 VM 上安装依赖
+# 连接到 VM
+gcloud compute ssh YOUR_VM_NAME
+# 安装 Python 和依赖
+sudo apt update
+sudo apt install -y python3 python3-pip
+cd usstock
+pip3 install -r requirements.txt
+3. 运行应用
+# 后台运行
+nohup streamlit run app.py --server.port 8501 --server.address 0.0.0.0 &
+# 或者用 screen/tmux
+screen -S streamlit
+streamlit run app.py
+4. 开放防火墙
+# 在 GCP 控制台 → VPC网络 → 防火墙规则
+# 或命令行
+gcloud compute firewall-rules create allow-streamlit --allow tcp:8501
+5. 访问
+http://YOUR_VM_IP:8501
+---
+
+
+
+
+在Ubuntu下运行streamlit项目的标准步骤是：
+1. 创建虚拟环境：python3 -m venv venv
+2. 激活虚拟环境：source venv/bin/activate
+3. 安装依赖：pip install -r requirements.txt
+4. 运行：streamlit run app.py
+用户说他已经安装了相关依赖但找不到streamlit命令，说明可能没有在虚拟环境中运行，或者没有正确激活虚拟环境。
+在Ubuntu下运行streamlit项目的标准步骤：
+# 1. 创建虚拟环境（项目根目录）
+python3 -m venv venv
+# 2. 激活虚拟环境
+source venv/bin/activate
+# 3. 安装依赖
+pip install -r requirements.txt
+# 4. 运行
+streamlit run app.py
+关键点：每次运行前必须先 source venv/bin/activate，激活后终端提示符前会显示 (venv)。
+如果你已经创建过虚拟环境但忘了激活，直接执行步骤2和4即可。
+在Linux下，不需要像Windows那样运行 venv\Scripts\activate.bat，而是用 source venv/bin/activate。
+
