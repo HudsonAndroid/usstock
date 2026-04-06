@@ -66,7 +66,7 @@ def get_ticker_pe(ticker, max_retries=3):
 
 @st.cache_data(ttl=3600)
 def get_sp500_pe():
-    MOCK_MODE = True
+    MOCK_MODE = False
     if MOCK_MODE:
         return 24.5
     return get_ticker_pe("SPY")
@@ -74,7 +74,7 @@ def get_sp500_pe():
 
 @st.cache_data(ttl=3600)
 def get_ndx_valuation():
-    MOCK_MODE = True
+    MOCK_MODE = False
     if MOCK_MODE:
         return 32.8
     return get_ticker_pe("QQQ")
@@ -82,7 +82,7 @@ def get_ndx_valuation():
 
 @st.cache_data(ttl=3600)
 def get_fear_greed():
-    MOCK_MODE = True
+    MOCK_MODE = False
     if MOCK_MODE:
         return 45.0
     try:
@@ -124,7 +124,7 @@ def get_index_color(pe, pe_historical):
 
 @st.cache_data(ttl=300)
 def get_stock_info(ticker_symbol):
-    MOCK_MODE = True
+    MOCK_MODE = False
     
     if MOCK_MODE:
         mock_data = {
